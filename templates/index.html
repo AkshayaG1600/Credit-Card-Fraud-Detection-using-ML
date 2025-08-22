@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Credit Card Fraud Detection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#1a1f36;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --primary-500:#3b82f6;
+      --success:#10b981;
+      --danger:#ef4444;
+      --border:#e5e7eb;
+      --shadow:0 10px 25px rgba(16,24,40,.06);
+      --radius:14px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      font-family:'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      line-height:1.5;
+    }
+
+    .page{
+      max-width:1100px;
+      margin:40px auto;
+      padding:0 16px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .header{
+      text-align:center;
+      padding:28px 22px 10px;
+    }
+    .title{
+      margin:0 0 8px;
+      font-weight:700;
+      font-size:clamp(22px, 2.5vw, 28px);
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    form{
+      padding:26px;
+    }
+
+    /* Sections */
+    .section-title{
+      font-weight:600;
+      margin:18px 0 12px;
+      font-size:14px;
+      color:var(--muted);
+      letter-spacing:.2px;
+      text-transform:uppercase;
+    }
+
+    /* Responsive grid */
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+      gap:14px 16px;
+    }
+
+    label{
+      display:block;
+      font-size:13px;
+      margin-bottom:6px;
+      color:#374151;
+      font-weight:600;
+    }
+
+    input[type="number"]{
+      width:100%;
+      appearance:textfield;
+      padding:11px 12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    input[type="number"]:focus{
+      outline:none;
+      border-color:var(--primary-500);
+      box-shadow:0 0 0 3px rgba(59,130,246,.15);
+    }
+    input::placeholder{color:#9ca3af}
+
+    /* Actions */
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      justify-content:center;
+      padding:12px 26px 26px;
+    }
+    .btn{
+      border:0;
+      cursor:pointer;
+      padding:12px 22px;
+      border-radius:999px;
+      font-weight:700;
+      letter-spacing:.2px;
+      transition:transform .05s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow:0 6px 16px rgba(37,99,235,.18);
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{
+      background:linear-gradient(180deg, var(--primary-500), var(--primary));
+      color:#fff;
+    }
+    .btn-secondary{
+      background:#eef2ff;
+      color:#1e3a8a;
+      box-shadow:none;
+      border:1px solid #dbeafe;
+    }
+
+    /* Result card */
+    .result-wrap{
+      margin:18px auto 0;
+      max-width:680px;
+    }
+    .result{
+      display:none;
+      padding:18px 20px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      align-items:center;
+      gap:10px;
+      font-weight:600;
+      text-align:center;
+    }
+    .result.show{display:flex; justify-content:center}
+
+    .result.legit{
+      background:#ecfdf5;
+      color:#065f46;
+      border-color:#a7f3d0;
+    }
+    .result.fraud{
+      background:#fef2f2;
+      color:#991b1b;
+      border-color:#fecaca;
+    }
+    .badge{
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:999px;
+      margin-left:8px;
+      background:#00000010;
+    }
+
+    /* Footer note */
+    .footnote{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      margin-top:14px;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <header class="header">
+        <h1 class="title">💳 Credit Card Fraud Detection</h1>
+        <p class="subtitle">Enter transaction features below. We’ll predict the likelihood of fraud.</p>
+      </header>
+
+      <form action="/check" method="post">
+        <!-- Section: Transaction Meta -->
+        <div class="section-title">Transaction Meta</div>
+        <div class="grid">
+          <div>
+            <label for="Time">Time (seconds since first txn)</label>
+            <input id="Time" name="Time" type="number" step="any" placeholder="e.g., 45231" required />
+          </div>
+          <div>
+            <label for="Amount">Amount (transaction value)</label>
+            <input id="Amount" name="Amount" type="number" step="any" placeholder="e.g., 129.99" required />
+          </div>
+        </div>
+
+        <!-- Section: PCA Features -->
+        <div class="section-title">PCA Features</div>
+        <div class="grid">
+          <!-- Repeatable pattern for V1..V28 -->
+          <div>
+            <label for="V1">Feature V1 (Transaction pattern)</label>
+            <input id="V1" name="V1" type="number" step="any" placeholder="Enter V1" required />
+          </div>
+          <div>
+            <label for="V2">Feature V2 (Transaction pattern)</label>
+            <input id="V2" name="V2" type="number" step="any" placeholder="Enter V2" required />
+          </div>
+          <div>
+            <label for="V3">Feature V3 (Transaction pattern)</label>
+            <input id="V3" name="V3" type="number" step="any" placeholder="Enter V3" required />
+          </div>
+          <div>
+            <label for="V4">Feature V4 (Transaction pattern)</label>
+            <input id="V4" name="V4" type="number" step="any" placeholder="Enter V4" required />
+          </div>
+          <div>
+            <label for="V5">Feature V5 (Transaction pattern)</label>
+            <input id="V5" name="V5" type="number" step="any" placeholder="Enter V5" required />
+          </div>
+          <div>
+            <label for="V6">Feature V6 (Transaction pattern)</label>
+            <input id="V6" name="V6" type="number" step="any" placeholder="Enter V6" required />
+          </div>
+          <div>
+            <label for="V7">Feature V7 (Transaction pattern)</label>
+            <input id="V7" name="V7" type="number" step="any" placeholder="Enter V7" required />
+          </div>
+          <div>
+            <label for="V8">Feature V8 (Transaction pattern)</label>
+            <input id="V8" name="V8" type="number" step="any" placeholder="Enter V8" required />
+          </div>
+          <div>
+            <label for="V9">Feature V9 (Transaction pattern)</label>
+            <input id="V9" name="V9" type="number" step="any" placeholder="Enter V9" required />
+          </div>
+          <div>
+            <label for="V10">Feature V10 (Transaction pattern)</label>
+            <input id="V10" name="V10" type="number" step="any" placeholder="Enter V10" required />
+          </div>
+          <div>
+            <label for="V11">Feature V11 (Transaction pattern)</label>
+            <input id="V11" name="V11" type="number" step="any" placeholder="Enter V11" required />
+          </div>
+          <div>
+            <label for="V12">Feature V12 (Transaction pattern)</label>
+            <input id="V12" name="V12" type="number" step="any" placeholder="Enter V12" required />
+          </div>
+          <div>
+            <label for="V13">Feature V13 (Transaction pattern)</label>
+            <input id="V13" name="V13" type="number" step="any" placeholder="Enter V13" required />
+          </div>
+          <div>
+            <label for="V14">Feature V14 (Transaction pattern)</label>
+            <input id="V14" name="V14" type="number" step="any" placeholder="Enter V14" required />
+          </div>
+          <div>
+            <label for="V15">Feature V15 (Transaction pattern)</label>
+            <input id="V15" name="V15" type="number" step="any" placeholder="Enter V15" required />
+          </div>
+          <div>
+            <label for="V16">Feature V16 (Transaction pattern)</label>
+            <input id="V16" name="V16" type="number" step="any" placeholder="Enter V16" required />
+          </div>
+          <div>
+            <label for="V17">Feature V17 (Transaction pattern)</label>
+            <input id="V17" name="V17" type="number" step="any" placeholder="Enter V17" required />
+          </div>
+          <div>
+            <label for="V18">Feature V18 (Transaction pattern)</label>
+            <input id="V18" name="V18" type="number" step="any" placeholder="Enter V18" required />
+          </div>
+          <div>
+            <label for="V19">Feature V19 (Transaction pattern)</label>
+            <input id="V19" name="V19" type="number" step="any" placeholder="Enter V19" required />
+          </div>
+          <div>
+            <label for="V20">Feature V20 (Transaction pattern)</label>
+            <input id="V20" name="V20" type="number" step="any" placeholder="Enter V20" required />
+          </div>
+          <div>
+            <label for="V21">Feature V21 (Transaction pattern)</label>
+            <input id="V21" name="V21" type="number" step="any" placeholder="Enter V21" required />
+          </div>
+          <div>
+            <label for="V22">Feature V22 (Transaction pattern)</label>
+            <input id="V22" name="V22" type="number" step="any" placeholder="Enter V22" required />
+          </div>
+          <div>
+            <label for="V23">Feature V23 (Transaction pattern)</label>
+            <input id="V23" name="V23" type="number" step="any" placeholder="Enter V23" required />
+          </div>
+          <div>
+            <label for="V24">Feature V24 (Transaction pattern)</label>
+            <input id="V24" name="V24" type="number" step="any" placeholder="Enter V24" required />
+          </div>
+          <div>
+            <label for="V25">Feature V25 (Transaction pattern)</label>
+            <input id="V25" name="V25" type="number" step="any" placeholder="Enter V25" required />
+          </div>
+          <div>
+            <label for="V26">Feature V26 (Transaction pattern)</label>
+            <input id="V26" name="V26" type="number" step="any" placeholder="Enter V26" required />
+          </div>
+          <div>
+            <label for="V27">Feature V27 (Transaction pattern)</label>
+            <input id="V27" name="V27" type="number" step="any" placeholder="Enter V27" required />
+          </div>
+          <div>
+            <label for="V28">Feature V28 (Transaction pattern)</label>
+            <input id="V28" name="V28" type="number" step="any" placeholder="Enter V28" required />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">🔍 Check</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Results -->
+    <div class="result-wrap">
+      {% if check %}
+        {% set status = 'fraud' if 'fraud' in check|lower else 'legit' %}
+        <div class="result show {{ status }}">
+          <span>
+            {{ check }}
+            {% if status == 'fraud' %}
+              <span class="badge"></span>
+            {% else %}
+              <span class="badge"></span>
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
+      <p class="footnote">This prediction is for assistance only and may contain errors.</p>
+    </div>
+  </main>
+</body>
+</html
