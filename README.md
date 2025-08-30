@@ -6,21 +6,21 @@ The project includes both research and implementation, comparing various machine
 
 📌 Features
 
-Data preprocessing, feature scaling, and skewness correction.
-Handling severe class imbalance using:
+1. Data preprocessing, feature scaling, and skewness correction.
+2. Handling severe class imbalance using:
   Random Undersampling (RUS)
   Random Oversampling (ROS)
   SMOTE (Synthetic Minority Oversampling Technique)
-Implementation of multiple ML models:
+3. Implementation of multiple ML models:
   Logistic Regression
   Naïve Bayes
   Decision Tree
   Random Forest
   XGBoost
-Ensemble methods: Hard Voting & Soft Voting
-Performance evaluation using Precision, Recall, F1-score, ROC-AUC (suitable for imbalanced datasets).
-Flask-based web application for real-time fraud prediction.
-Deployment on Render for online access.
+4. Ensemble methods: Hard Voting & Soft Voting
+5. Performance evaluation using Precision, Recall, F1-score, ROC-AUC (suitable for imbalanced datasets).
+6. Flask-based web application for real-time fraud prediction.
+7. Deployment on Render for online access.
 
 🌐 Live Demo
 The application is deployed on Render:
